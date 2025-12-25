@@ -1,0 +1,383 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <meta name="color-scheme" content="light">
+                  <meta name="supported-color-schemes" content="light">
+                  <title>内容详情</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 402
+                const height = 874
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'elderly_home': '长者首页',
+    'elderly_voice_input': '语音输入',
+    'elderly_service_guidance': '智能引导服务',
+    'elderly_service_result': '服务结果同步',
+    'elderly_emergency_help': '一键求助',
+    'elderly_settings': '个性化设置',
+    'children_home': '子女端首页',
+    'children_parent_management': '父母账号管理',
+    'children_remote_authorize': '远程授权页面',
+    'children_business_proxy': '业务代办与预约',
+    'children_safety_settings': '安全管控设置',
+    'children_parent_monitor': '父母状态监测',
+    'ai_platform_overview': 'AI平台总览',
+    'ai_nlu_processing': 'AI自然语言处理',
+    'ai_automated_service': 'AI自动化服务',
+    'ai_user_behavior_analysis': 'AI用户行为分析',
+    'ai_platform_settings': 'AI平台设置',
+    'high_frequency_service_selection': '高频服务选择',
+    'service_booking_appointment': '就医挂号',
+    'service_travel_booking': '交通出行',
+    'service_life_payment': '生活缴费',
+    'service_payment_confirmation': '支付确认',
+    'service_emergency_call': '一键求助',
+    'elderly_emergency_initiate': '紧急求助发起',
+    'elderly_emergency_response_options': '求助响应选项',
+    'elderly_emergency_help_request': '协助请求发送',
+    'elderly_emergency_cancel': '求助取消确认',
+    'children_account_bind': '账户绑定',
+    'children_information_prefill': '信息预填加密',
+    'initial_welcome': '欢迎页面',
+    'login_options': '登录注册选择',
+    'phone_login': '手机号登录',
+    'wechat_login': '微信登录',
+    'registration_start': '注册',
+    'phone_verification': '手机验证',
+    'user_type_selection': '用户类型选择',
+    'elderly_family_interaction_content_hub': '亲友互动与内容中心',
+    'elderly_family_video_call': '亲友视频通话',
+    'elderly_information_browsing': '资讯与内容',
+    'elderly_content_detail': '内容详情',
+    'elderly_customer_service_selection': '客服支持选择'
+                }
+                const allPageIds = ["elderly_home","elderly_voice_input","elderly_service_guidance","elderly_service_result","elderly_emergency_help","elderly_settings","children_home","children_parent_management","children_remote_authorize","children_business_proxy","children_safety_settings","children_parent_monitor","ai_platform_overview","ai_nlu_processing","ai_automated_service","ai_user_behavior_analysis","ai_platform_settings","high_frequency_service_selection","service_booking_appointment","service_travel_booking","service_life_payment","service_payment_confirmation","service_emergency_call","elderly_emergency_initiate","elderly_emergency_response_options","elderly_emergency_help_request","elderly_emergency_cancel","children_account_bind","children_information_prefill","initial_welcome","login_options","phone_login","wechat_login","registration_start","phone_verification","user_type_selection","elderly_family_interaction_content_hub","elderly_family_video_call","elderly_information_browsing","elderly_content_detail","elderly_customer_service_selection"]
+                const allFormatPageIdsMap = {"elderly_home":"elderly-home","elderly_voice_input":"elderly-voice-input","elderly_service_guidance":"elderly-service-guidance","elderly_service_result":"elderly-service-result","elderly_emergency_help":"elderly-emergency-help","elderly_settings":"elderly-settings","children_home":"children-home","children_parent_management":"children-parent-management","children_remote_authorize":"children-remote-authorize","children_business_proxy":"children-business-proxy","children_safety_settings":"children-safety-settings","children_parent_monitor":"children-parent-monitor","ai_platform_overview":"ai-platform-overview","ai_nlu_processing":"ai-nlu-processing","ai_automated_service":"ai-automated-service","ai_user_behavior_analysis":"ai-user-behavior-analysis","ai_platform_settings":"ai-platform-settings","high_frequency_service_selection":"high-frequency-service-selection","service_booking_appointment":"service-booking-appointment","service_travel_booking":"service-travel-booking","service_life_payment":"service-life-payment","service_payment_confirmation":"service-payment-confirmation","service_emergency_call":"service-emergency-call","elderly_emergency_initiate":"elderly-emergency-initiate","elderly_emergency_response_options":"elderly-emergency-response-options","elderly_emergency_help_request":"elderly-emergency-help-request","elderly_emergency_cancel":"elderly-emergency-cancel","children_account_bind":"children-account-bind","children_information_prefill":"children-information-prefill","initial_welcome":"initial-welcome","login_options":"login-options","phone_login":"phone-login","wechat_login":"wechat-login","registration_start":"registration-start","phone_verification":"phone-verification","user_type_selection":"user-type-selection","elderly_family_interaction_content_hub":"elderly-family-interaction-content-hub","elderly_family_video_call":"elderly-family-video-call","elderly_information_browsing":"elderly-information-browsing","elderly_content_detail":"elderly-content-detail","elderly_customer_service_selection":"elderly-customer-service-selection"}
+                const IFRAME_MESSAGE_TYPE = {
+                  iframeNavigation: 'iframeNavigation',
+                }
+                const safeAddEventListener = function Tc(e,t,r,n=!1){e.removeEventListener(t,r,n),e.addEventListener(t,r,n)}
+                const processOnclick = (e,t,r)=>{if(r){const n=Mb(t);if(n.methodName&&Op(n.methodName,r))return;e.preventDefault(),e.stopPropagation();const s=n.args||[],i=(s==null?void 0:s.find(u=>u))||"";i&&Pp(i)}}
+                const checkIframeMethod = (e,t)=>{try{return typeof t[e]=="function"||typeof t[e]=="function"}catch(r){return!1}}
+                const postIframeMessage = (targetPageId) => {
+                  window.parent.postMessage({
+                    type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                    targetPageId,
+                  })
+                }
+                const handleIframeLinkClick = (event) => {
+                  const dynamicIframe = document.querySelector('#dynamicIframe')
+                  if (!dynamicIframe?.contentWindow) {
+                    return
+                  }
+                  const link = event.target.closest('a')
+                  const target = event.target
+                  if (link) {
+                    const href = link.getAttribute('href')
+                    const onclick = link.getAttribute('onclick')
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      const targetPageId = getKeyByValueObj(allFormatPageIdsMap, href)
+                      if (targetPageId) {
+                        postIframeMessage(targetPageId)
+                      }
+                      return
+                    }
+                    if (onclick) {
+                      processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                    } else {
+                      event.preventDefault()
+                      event.stopPropagation() 
+                    }
+                    return
+                  }
+                  const onclick = target.getAttribute('onclick')
+                  if (onclick) {
+                    processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                  }
+                }
+                function stringExt(link) {
+                  let s = String(link || '')
+                  s = (s.split('#')[0] || '')
+                  s = (s.split('?')[0] || '')
+                  s = s.trim()
+                  s = s.split('/').filter(Boolean).pop() || ''
+                  const lower = s.toLowerCase()
+                  if (lower.endsWith('.html') || lower.endsWith('.php') || lower.endsWith('.aspx')) {
+                    s = s.slice(0, s.lastIndexOf('.'))
+                  }
+                  return s
+                }
+                function formatHref(href) {
+                  if (!href) {
+                    return ''
+                  }
+                  try {
+                    const url = new URL(href, window.location.href)
+                    const pathname = url.pathname || ''
+                    return stringExt(pathname)
+                  } catch {
+                    return stringExt(href)
+                  }
+                }
+                function getKeyByValueObj(obj, value) {
+                  const newValue = formatHref(value)
+                  const keyFind = Object.keys(obj).find(k => k === newValue)
+                  if (keyFind) {
+                    return keyFind
+                  }
+                  return Object.keys(obj).find(k => obj[k] === newValue)
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                function setupIframeEvents() {
+                  const iframe = document.getElementById('dynamicIframe')
+                  if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
+                    safeAddEventListener(iframe.contentWindow.document, 'click', handleIframeLinkClick, true)
+                  } else {
+                    setTimeout(setupIframeEvents, 100)
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = function() {
+                  adjustIframeSize()
+                  setupIframeEvents()
+                }
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="11" data-source-line-end="21" lang="en"><head data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="12" data-source-line-end="17"><script>(function(){
+      function stringExt(link) {
+        let s = String(link || &#39;&#39;)
+        s = (s.split(&#39;#&#39;)[0] || &#39;&#39;)
+        s = (s.split(&#39;?&#39;)[0] || &#39;&#39;)
+        s = s.trim()
+        s = s.split(&#39;/&#39;).filter(Boolean).pop() || &#39;&#39;
+        const lower = s.toLowerCase()
+        if (lower.endsWith(&#39;.html&#39;) || lower.endsWith(&#39;.php&#39;) || lower.endsWith(&#39;.aspx&#39;)) {
+          s = s.slice(0, s.lastIndexOf(&#39;.&#39;))
+        }
+        return s
+      }
+      function formatHref(href) {
+        if (!href) {
+          return &#39;&#39;
+        }
+        try {
+          const url = new URL(href, window.location.href)
+          const pathname = url.pathname || &#39;&#39;
+          return stringExt(pathname)
+        } catch {
+          return stringExt(href)
+        }
+      }
+      function getKeyByValueObj(obj, value) {
+        const newValue = formatHref(value)
+        const keyFind = Object.keys(obj).find(k => k === newValue)
+        if (keyFind) {
+          return keyFind
+        }
+        return Object.keys(obj).find(k => obj[k] === newValue)
+      }
+      function emit(to, source){
+        try {
+          if (window.parent) {
+            const allFormatPageIdsMap = {"elderly_home":"elderly-home","elderly_voice_input":"elderly-voice-input","elderly_service_guidance":"elderly-service-guidance","elderly_service_result":"elderly-service-result","elderly_emergency_help":"elderly-emergency-help","elderly_settings":"elderly-settings","children_home":"children-home","children_parent_management":"children-parent-management","children_remote_authorize":"children-remote-authorize","children_business_proxy":"children-business-proxy","children_safety_settings":"children-safety-settings","children_parent_monitor":"children-parent-monitor","ai_platform_overview":"ai-platform-overview","ai_nlu_processing":"ai-nlu-processing","ai_automated_service":"ai-automated-service","ai_user_behavior_analysis":"ai-user-behavior-analysis","ai_platform_settings":"ai-platform-settings","high_frequency_service_selection":"high-frequency-service-selection","service_booking_appointment":"service-booking-appointment","service_travel_booking":"service-travel-booking","service_life_payment":"service-life-payment","service_payment_confirmation":"service-payment-confirmation","service_emergency_call":"service-emergency-call","elderly_emergency_initiate":"elderly-emergency-initiate","elderly_emergency_response_options":"elderly-emergency-response-options","elderly_emergency_help_request":"elderly-emergency-help-request","elderly_emergency_cancel":"elderly-emergency-cancel","children_account_bind":"children-account-bind","children_information_prefill":"children-information-prefill","initial_welcome":"initial-welcome","login_options":"login-options","phone_login":"phone-login","wechat_login":"wechat-login","registration_start":"registration-start","phone_verification":"phone-verification","user_type_selection":"user-type-selection","elderly_family_interaction_content_hub":"elderly-family-interaction-content-hub","elderly_family_video_call":"elderly-family-video-call","elderly_information_browsing":"elderly-information-browsing","elderly_content_detail":"elderly-content-detail","elderly_customer_service_selection":"elderly-customer-service-selection"}
+            const IFRAME_MESSAGE_TYPE = {
+              iframeNavigation: &#39;iframeNavigation&#39;,
+            }
+            const targetPageId = getKeyByValueObj(allFormatPageIdsMap, String(to || &#39;&#39;))
+            if (targetPageId) {
+              window.parent.postMessage({
+                type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                targetPageId,
+              }, &#39;*&#39;)
+            }
+          }
+        } catch(e) {}
+      }
+      try{
+        if (&#39;navigation&#39; in window &amp;&amp; window.navigation &amp;&amp; typeof window.navigation.addEventListener===&#39;function&#39;){
+          window.navigation.addEventListener(&#39;navigate&#39;, function(e){
+            try{
+              var url = (e.destination &amp;&amp; e.destination.url) || &#39;&#39;;
+              if (e.canIntercept &amp;&amp; typeof e.intercept===&#39;function&#39;){ e.intercept({ handler:function(){} }) }
+              else if (e.preventDefault){ e.preventDefault() }
+              emit(url)
+            }catch(_){}
+          })
+        }
+      }catch(_){}
+    })();</script><meta name="supported-color-schemes" content="light"><meta name="color-scheme" content="light"><style>
+      :root, html, body { color-scheme: light; }
+      html { forced-color-adjust: none; }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Built with Astro">
+    <title data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="16" data-source-line-end="16">内容详情 - 银龄桥</title>
+  <link rel="stylesheet" href="./assets/html/68141/ai-automated-service.CedRRZM6.css">
+<style>[data-v-0b8b2d84] .prose{word-break:break-word;overflow-wrap:break-word}
+</style><script src="https://assets.qingshuxuetang.com/static/uxbot/25_6/holder.js"></script></head>
+  <body data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="18" data-source-line-end="20">
+    
+  <div data-source-file="src/pages/elderly-content-detail.astro" data-source-line-start="11" data-source-line-end="36" class="flex flex-col min-h-screen bg-background">
+    <!-- 头部 -->
+    <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&amp;&amp;s.isSameNode(this)&amp;&amp;(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&amp;&amp;s.isSameNode(this)&amp;&amp;(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&amp;&amp;(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&amp;&amp;this.lastChild.nodeValue==="astro:end"&amp;&amp;(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&amp;&amp;await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><astro-island uid="2nXBh3" prefix="s0" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/ElderlyHeader.BtUQxJkP.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/client.BnO2dzpZ.js" props="{&amp;quot;title&amp;quot;:[0,&amp;quot;资讯详情&amp;quot;],&amp;quot;showBack&amp;quot;:[0,true],&amp;quot;showEmergency&amp;quot;:[0,true],&amp;quot;backHref&amp;quot;:[0,&amp;quot;./elderly-information-browsing.html&amp;quot;]}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;ElderlyHeader&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><header class="sticky top-0 left-0 right-0 bg-card border-b border-border safe-area-inset-top z-40" data-source-file="src/components/common/ElderlyHeader.vue" data-source-line-start="29" data-source-line-end="65"><div class="flex items-center justify-between px-4 py-4" data-source-file="src/components/common/ElderlyHeader.vue" data-source-line-start="30" data-source-line-end="64"><div class="w-12" data-source-file="src/components/common/ElderlyHeader.vue" data-source-line-start="32" data-source-line-end="44"><a class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 w-10 touch-target" href="./elderly-information-browsing.html" aria-label="返回" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27"><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-chevron-left-icon lucide-chevron-left"><path d="m15 18-6-6 6-6"></path></svg><!--]--></a></div><h1 class="flex-1 text-center text-2xl font-medium text-foreground px-2" data-source-file="src/components/common/ElderlyHeader.vue" data-source-line-start="47" data-source-line-end="49">资讯详情</h1><div class="w-12" data-source-file="src/components/common/ElderlyHeader.vue" data-source-line-start="52" data-source-line-end="63"><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 h-10 w-10 touch-target text-destructive hover:text-destructive hover:bg-destructive/10" aria-label="紧急求助" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27"><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-circle-alert-icon lucide-circle-alert"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg><!--]--></button></div></div></header><!--astro:end--></astro-island>
+
+    <!-- 主内容区域 -->
+    <main data-source-file="src/pages/elderly-content-detail.astro" data-source-line-start="22" data-source-line-end="32" class="flex-1 pb-24 overflow-y-auto">
+      <script>(()=>{var l=(n,t)=>{let i=async()=>{await(await n())()},e=typeof t.value=="object"?t.value:void 0,s={timeout:e==null?void 0:e.timeout};"requestIdleCallback"in window?window.requestIdleCallback(i,s):setTimeout(i,s.timeout||200)};(self.Astro||(self.Astro={})).idle=l;window.dispatchEvent(new Event("astro:idle"));})();</script><astro-island uid="2wYpp0" prefix="s1" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/ContentDetailContent.DFNEGojS.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/client.BnO2dzpZ.js" props="{&amp;quot;contentId&amp;quot;:[0,&amp;quot;A001&amp;quot;],&amp;quot;title&amp;quot;:[0,&amp;quot;如何使用语音输入法？一学就会！&amp;quot;],&amp;quot;author&amp;quot;:[0,&amp;quot;银龄桥编辑部&amp;quot;],&amp;quot;mainImageUrl&amp;quot;:[0,&amp;quot;https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2025/12/3/d4315892-3d54-4c60-84fa-ca88bd1722db.png&amp;quot;],&amp;quot;fullText&amp;quot;:[0,&amp;quot;语音输入法是一种非常方便的工具，它可以让您不必自己打字就能发送信息或输入指令。\n\n第一步：找到并点击麦克风图标。在“银龄桥”APP中，您只需要在首页点击红色的“按住说话”按钮。请注意，这个按钮非常大，您不会点错。\n\n第二步：开始说话。请您用清晰、缓慢的语速说出您的需求，例如：“我要交水费”。系统会立即将您的话转换成文字。\n\n第三步：确认。系统可能会用语音重复提示您：“是要办理水费缴纳业务吗？”，请您再次口头确认或点击屏幕上的确认按钮。&amp;quot;],&amp;quot;isReadAloudSupported&amp;quot;:[0,true]}" ssr="" client="idle" opts="{&amp;quot;name&amp;quot;:&amp;quot;ContentDetailContent&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><div class="w-full max-w-2xl mx-auto px-4 py-6" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="112" data-source-line-end="196" data-v-0b8b2d84=""><div class="mb-6 rounded-lg overflow-hidden shadow-card" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="114" data-source-line-end="120" data-v-0b8b2d84=""><img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2025/12/3/d4315892-3d54-4c60-84fa-ca88bd1722db.png" alt="如何使用语音输入法？一学就会！" class="w-full h-64 object-cover" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="115" data-source-line-end="119" data-v-0b8b2d84=""></div><h1 class="font-bold text-foreground mb-4 text-2xl" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="123" data-source-line-end="125" data-v-0b8b2d84="">如何使用语音输入法？一学就会！</h1><div class="flex items-center justify-between mb-6 pb-4 border-b border-border" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="128" data-source-line-end="132" data-v-0b8b2d84=""><div class="text-lg leading-relaxed flex items-center gap-2 text-muted-foreground" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="129" data-source-line-end="131" data-v-0b8b2d84=""><span data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="130" data-source-line-end="130" data-v-0b8b2d84="">作者：银龄桥编辑部</span></div></div><div class="flex items-center justify-between gap-2 mb-6 p-4 bg-muted rounded-lg" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="135" data-source-line-end="176" data-v-0b8b2d84=""><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 touch-target" aria-label="开始朗读" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-0b8b2d84=""><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide mr-2 lucide-volume2-icon lucide-volume-2 mr-2" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-0b8b2d84=""><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"></path><path d="M16 9a5 5 0 0 1 0 6"></path><path d="M19.364 18.364a9 9 0 0 0 0-12.728"></path></svg><span class="text-sm font-medium" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="151" data-source-line-end="153" data-v-0b8b2d84="">朗读</span><!--]--></button><div class="flex items-center gap-1" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="157" data-source-line-end="175" data-v-0b8b2d84=""><span class="text-sm text-muted-foreground mr-2" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="158" data-source-line-end="158" data-v-0b8b2d84="">字体：</span><!--[--><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 touch-target" aria-label="小字体" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-0b8b2d84=""><!--[--><span class="font-bold text-xs" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="168" data-source-line-end="173" data-v-0b8b2d84="">A</span><!--]--></button><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3 touch-target" aria-label="中字体" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-0b8b2d84=""><!--[--><span class="font-bold text-sm" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="168" data-source-line-end="173" data-v-0b8b2d84="">A</span><!--]--></button><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 touch-target" aria-label="大字体" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-0b8b2d84=""><!--[--><span class="font-bold text-base" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="168" data-source-line-end="173" data-v-0b8b2d84="">A</span><!--]--></button><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 border border-input bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 touch-target" aria-label="超大字体" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-0b8b2d84=""><!--[--><span class="font-bold text-lg" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="168" data-source-line-end="173" data-v-0b8b2d84="">A</span><!--]--></button><!--]--></div></div><div class="prose prose-sm max-w-none text-foreground leading-relaxed text-lg leading-relaxed" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="179" data-source-line-end="192" data-v-0b8b2d84=""><!--[--><p class="mb-4 whitespace-pre-wrap" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="185" data-source-line-end="191" data-v-0b8b2d84="">语音输入法是一种非常方便的工具，它可以让您不必自己打字就能发送信息或输入指令。</p><p class="mb-4 whitespace-pre-wrap" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="185" data-source-line-end="191" data-v-0b8b2d84="">第一步：找到并点击麦克风图标。在“银龄桥”APP中，您只需要在首页点击红色的“按住说话”按钮。请注意，这个按钮非常大，您不会点错。</p><p class="mb-4 whitespace-pre-wrap" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="185" data-source-line-end="191" data-v-0b8b2d84="">第二步：开始说话。请您用清晰、缓慢的语速说出您的需求，例如：“我要交水费”。系统会立即将您的话转换成文字。</p><p class="mb-4 whitespace-pre-wrap" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="185" data-source-line-end="191" data-v-0b8b2d84="">第三步：确认。系统可能会用语音重复提示您：“是要办理水费缴纳业务吗？”，请您再次口头确认或点击屏幕上的确认按钮。</p><!--]--></div><div class="h-8" data-source-file="src/components/elderly-content-detail/ContentDetailContent.vue" data-source-line-start="195" data-source-line-end="195" data-v-0b8b2d84=""></div></div><!--astro:end--></astro-island>
+    </main>
+
+    <!-- 底部导航 -->
+    <astro-island uid="Z1BHGb" prefix="s2" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/ElderlyBottomNav.BGQ2Co5_.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/client.BnO2dzpZ.js" props="{&amp;quot;currentPage&amp;quot;:[0,&amp;quot;home&amp;quot;]}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;ElderlyBottomNav&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><nav class="fixed bottom-0 left-0 right-0 bg-card border-t border-border safe-area-inset-bottom z-50" data-source-file="src/components/common/ElderlyBottomNav.vue" data-source-line-start="25" data-source-line-end="49"><div class="flex items-center justify-around px-2 py-3" data-source-file="src/components/common/ElderlyBottomNav.vue" data-source-line-start="26" data-source-line-end="48"><!--[--><a href="./elderly-home.html" class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-lg transition-colors touch-target text-primary bg-primary/10" aria-label="首页" aria-current="page" data-source-file="src/components/common/ElderlyBottomNav.vue" data-source-line-start="27" data-source-line-end="47"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-primary lucide-house-icon lucide-house text-primary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg><span class="text-sm font-medium" data-source-file="src/components/common/ElderlyBottomNav.vue" data-source-line-start="46" data-source-line-end="46">首页</span></a><a href="./elderly-voice-input.html" class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-lg transition-colors touch-target text-muted-foreground hover:text-foreground" aria-label="语音" data-source-file="src/components/common/ElderlyBottomNav.vue" data-source-line-start="27" data-source-line-end="47"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic-icon lucide-mic" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M12 19v3"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><rect x="9" y="2" width="6" height="13" rx="3"></rect></svg><span class="text-sm font-medium" data-source-file="src/components/common/ElderlyBottomNav.vue" data-source-line-start="46" data-source-line-end="46">语音</span></a><a href="./elderly-emergency-help.html" class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-lg transition-colors touch-target text-muted-foreground hover:text-foreground" aria-label="求助" data-source-file="src/components/common/ElderlyBottomNav.vue" data-source-line-start="27" data-source-line-end="47"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert-icon lucide-circle-alert" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg><span class="text-sm font-medium" data-source-file="src/components/common/ElderlyBottomNav.vue" data-source-line-start="46" data-source-line-end="46">求助</span></a><a href="./elderly-settings.html" class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-lg transition-colors touch-target text-muted-foreground hover:text-foreground" aria-label="设置" data-source-file="src/components/common/ElderlyBottomNav.vue" data-source-line-start="27" data-source-line-end="47"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg><span class="text-sm font-medium" data-source-file="src/components/common/ElderlyBottomNav.vue" data-source-line-start="46" data-source-line-end="46">设置</span></a><!--]--></div></nav><!--astro:end--></astro-island>
+  </div>
+
+  <script>
+      const originalBack = window.history.back
+      const originalForward = window.history.forward
+      const originalGo = window.history.go
+      function isValidNavigation(){
+        if(!window.parent.history.state.back || !window.parent.history.state.back.startsWith(&#39;/designPage&#39;)){
+          return false
+        }
+        return true
+      }
+      window.history.back = function(...args) {
+       if(!isValidNavigation()){
+          return
+        }
+        return originalBack.apply(this, args);
+      };
+
+      window.history.forward = function(...args) {
+        if(!isValidNavigation()){
+          return
+        }
+        return originalForward.apply(this, args);
+      };
+
+      window.history.go = function(...args) {
+        if(!isValidNavigation()){
+          return
+        }
+        return originalGo.apply(this, args);
+      };
+      // 等待 Holder.js 加载完成后初始化
+      setTimeout(() => {
+        if (typeof Holder === &#39;undefined&#39;) {
+          console.warn(&#39;Holder.js 未能正确加载&#39;);
+          return;
+        }
+        
+        try {
+          // 初始化 Holder.js
+          Holder.run({
+            domain: "placehold.co"
+          });
+          
+          // 保存原始函数的引用
+          const originalRun = Holder.run;
+          
+          // 重写 Holder.run 函数以移除固定尺寸
+          Holder.run = function(options) {
+            const result = originalRun.call(this, options);
+            
+            // 移除 Holder 元素的固定宽高样式
+            const holderElements = document.querySelectorAll(&#39;[data-holder-rendered="true"]&#39;);
+            holderElements.forEach(el => {
+              el.style.removeProperty(&#39;width&#39;);
+              el.style.removeProperty(&#39;height&#39;);
+            });
+            
+            return result;
+          };
+        } catch (error) {
+          console.error(&#39;Holder.js 初始化失败:&#39;, error);
+        }
+      }, 30);
+    </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            

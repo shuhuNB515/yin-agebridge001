@@ -1,0 +1,379 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <meta name="color-scheme" content="light">
+                  <meta name="supported-color-schemes" content="light">
+                  <title>安全管控设置</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 402
+                const height = 874
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'elderly_home': '长者首页',
+    'elderly_voice_input': '语音输入',
+    'elderly_service_guidance': '智能引导服务',
+    'elderly_service_result': '服务结果同步',
+    'elderly_emergency_help': '一键求助',
+    'elderly_settings': '个性化设置',
+    'children_home': '子女端首页',
+    'children_parent_management': '父母账号管理',
+    'children_remote_authorize': '远程授权页面',
+    'children_business_proxy': '业务代办与预约',
+    'children_safety_settings': '安全管控设置',
+    'children_parent_monitor': '父母状态监测',
+    'ai_platform_overview': 'AI平台总览',
+    'ai_nlu_processing': 'AI自然语言处理',
+    'ai_automated_service': 'AI自动化服务',
+    'ai_user_behavior_analysis': 'AI用户行为分析',
+    'ai_platform_settings': 'AI平台设置',
+    'high_frequency_service_selection': '高频服务选择',
+    'service_booking_appointment': '就医挂号',
+    'service_travel_booking': '交通出行',
+    'service_life_payment': '生活缴费',
+    'service_payment_confirmation': '支付确认',
+    'service_emergency_call': '一键求助',
+    'elderly_emergency_initiate': '紧急求助发起',
+    'elderly_emergency_response_options': '求助响应选项',
+    'elderly_emergency_help_request': '协助请求发送',
+    'elderly_emergency_cancel': '求助取消确认',
+    'children_account_bind': '账户绑定',
+    'children_information_prefill': '信息预填加密',
+    'initial_welcome': '欢迎页面',
+    'login_options': '登录注册选择',
+    'phone_login': '手机号登录',
+    'wechat_login': '微信登录',
+    'registration_start': '注册',
+    'phone_verification': '手机验证',
+    'user_type_selection': '用户类型选择',
+    'elderly_family_interaction_content_hub': '亲友互动与内容中心',
+    'elderly_family_video_call': '亲友视频通话',
+    'elderly_information_browsing': '资讯与内容',
+    'elderly_content_detail': '内容详情',
+    'elderly_customer_service_selection': '客服支持选择'
+                }
+                const allPageIds = ["elderly_home","elderly_voice_input","elderly_service_guidance","elderly_service_result","elderly_emergency_help","elderly_settings","children_home","children_parent_management","children_remote_authorize","children_business_proxy","children_safety_settings","children_parent_monitor","ai_platform_overview","ai_nlu_processing","ai_automated_service","ai_user_behavior_analysis","ai_platform_settings","high_frequency_service_selection","service_booking_appointment","service_travel_booking","service_life_payment","service_payment_confirmation","service_emergency_call","elderly_emergency_initiate","elderly_emergency_response_options","elderly_emergency_help_request","elderly_emergency_cancel","children_account_bind","children_information_prefill","initial_welcome","login_options","phone_login","wechat_login","registration_start","phone_verification","user_type_selection","elderly_family_interaction_content_hub","elderly_family_video_call","elderly_information_browsing","elderly_content_detail","elderly_customer_service_selection"]
+                const allFormatPageIdsMap = {"elderly_home":"elderly-home","elderly_voice_input":"elderly-voice-input","elderly_service_guidance":"elderly-service-guidance","elderly_service_result":"elderly-service-result","elderly_emergency_help":"elderly-emergency-help","elderly_settings":"elderly-settings","children_home":"children-home","children_parent_management":"children-parent-management","children_remote_authorize":"children-remote-authorize","children_business_proxy":"children-business-proxy","children_safety_settings":"children-safety-settings","children_parent_monitor":"children-parent-monitor","ai_platform_overview":"ai-platform-overview","ai_nlu_processing":"ai-nlu-processing","ai_automated_service":"ai-automated-service","ai_user_behavior_analysis":"ai-user-behavior-analysis","ai_platform_settings":"ai-platform-settings","high_frequency_service_selection":"high-frequency-service-selection","service_booking_appointment":"service-booking-appointment","service_travel_booking":"service-travel-booking","service_life_payment":"service-life-payment","service_payment_confirmation":"service-payment-confirmation","service_emergency_call":"service-emergency-call","elderly_emergency_initiate":"elderly-emergency-initiate","elderly_emergency_response_options":"elderly-emergency-response-options","elderly_emergency_help_request":"elderly-emergency-help-request","elderly_emergency_cancel":"elderly-emergency-cancel","children_account_bind":"children-account-bind","children_information_prefill":"children-information-prefill","initial_welcome":"initial-welcome","login_options":"login-options","phone_login":"phone-login","wechat_login":"wechat-login","registration_start":"registration-start","phone_verification":"phone-verification","user_type_selection":"user-type-selection","elderly_family_interaction_content_hub":"elderly-family-interaction-content-hub","elderly_family_video_call":"elderly-family-video-call","elderly_information_browsing":"elderly-information-browsing","elderly_content_detail":"elderly-content-detail","elderly_customer_service_selection":"elderly-customer-service-selection"}
+                const IFRAME_MESSAGE_TYPE = {
+                  iframeNavigation: 'iframeNavigation',
+                }
+                const safeAddEventListener = function Tc(e,t,r,n=!1){e.removeEventListener(t,r,n),e.addEventListener(t,r,n)}
+                const processOnclick = (e,t,r)=>{if(r){const n=Mb(t);if(n.methodName&&Op(n.methodName,r))return;e.preventDefault(),e.stopPropagation();const s=n.args||[],i=(s==null?void 0:s.find(u=>u))||"";i&&Pp(i)}}
+                const checkIframeMethod = (e,t)=>{try{return typeof t[e]=="function"||typeof t[e]=="function"}catch(r){return!1}}
+                const postIframeMessage = (targetPageId) => {
+                  window.parent.postMessage({
+                    type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                    targetPageId,
+                  })
+                }
+                const handleIframeLinkClick = (event) => {
+                  const dynamicIframe = document.querySelector('#dynamicIframe')
+                  if (!dynamicIframe?.contentWindow) {
+                    return
+                  }
+                  const link = event.target.closest('a')
+                  const target = event.target
+                  if (link) {
+                    const href = link.getAttribute('href')
+                    const onclick = link.getAttribute('onclick')
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      const targetPageId = getKeyByValueObj(allFormatPageIdsMap, href)
+                      if (targetPageId) {
+                        postIframeMessage(targetPageId)
+                      }
+                      return
+                    }
+                    if (onclick) {
+                      processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                    } else {
+                      event.preventDefault()
+                      event.stopPropagation() 
+                    }
+                    return
+                  }
+                  const onclick = target.getAttribute('onclick')
+                  if (onclick) {
+                    processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                  }
+                }
+                function stringExt(link) {
+                  let s = String(link || '')
+                  s = (s.split('#')[0] || '')
+                  s = (s.split('?')[0] || '')
+                  s = s.trim()
+                  s = s.split('/').filter(Boolean).pop() || ''
+                  const lower = s.toLowerCase()
+                  if (lower.endsWith('.html') || lower.endsWith('.php') || lower.endsWith('.aspx')) {
+                    s = s.slice(0, s.lastIndexOf('.'))
+                  }
+                  return s
+                }
+                function formatHref(href) {
+                  if (!href) {
+                    return ''
+                  }
+                  try {
+                    const url = new URL(href, window.location.href)
+                    const pathname = url.pathname || ''
+                    return stringExt(pathname)
+                  } catch {
+                    return stringExt(href)
+                  }
+                }
+                function getKeyByValueObj(obj, value) {
+                  const newValue = formatHref(value)
+                  const keyFind = Object.keys(obj).find(k => k === newValue)
+                  if (keyFind) {
+                    return keyFind
+                  }
+                  return Object.keys(obj).find(k => obj[k] === newValue)
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                function setupIframeEvents() {
+                  const iframe = document.getElementById('dynamicIframe')
+                  if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
+                    safeAddEventListener(iframe.contentWindow.document, 'click', handleIframeLinkClick, true)
+                  } else {
+                    setTimeout(setupIframeEvents, 100)
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = function() {
+                  adjustIframeSize()
+                  setupIframeEvents()
+                }
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="11" data-source-line-end="21" lang="en"><head data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="12" data-source-line-end="17"><script>(function(){
+      function stringExt(link) {
+        let s = String(link || &#39;&#39;)
+        s = (s.split(&#39;#&#39;)[0] || &#39;&#39;)
+        s = (s.split(&#39;?&#39;)[0] || &#39;&#39;)
+        s = s.trim()
+        s = s.split(&#39;/&#39;).filter(Boolean).pop() || &#39;&#39;
+        const lower = s.toLowerCase()
+        if (lower.endsWith(&#39;.html&#39;) || lower.endsWith(&#39;.php&#39;) || lower.endsWith(&#39;.aspx&#39;)) {
+          s = s.slice(0, s.lastIndexOf(&#39;.&#39;))
+        }
+        return s
+      }
+      function formatHref(href) {
+        if (!href) {
+          return &#39;&#39;
+        }
+        try {
+          const url = new URL(href, window.location.href)
+          const pathname = url.pathname || &#39;&#39;
+          return stringExt(pathname)
+        } catch {
+          return stringExt(href)
+        }
+      }
+      function getKeyByValueObj(obj, value) {
+        const newValue = formatHref(value)
+        const keyFind = Object.keys(obj).find(k => k === newValue)
+        if (keyFind) {
+          return keyFind
+        }
+        return Object.keys(obj).find(k => obj[k] === newValue)
+      }
+      function emit(to, source){
+        try {
+          if (window.parent) {
+            const allFormatPageIdsMap = {"elderly_home":"elderly-home","elderly_voice_input":"elderly-voice-input","elderly_service_guidance":"elderly-service-guidance","elderly_service_result":"elderly-service-result","elderly_emergency_help":"elderly-emergency-help","elderly_settings":"elderly-settings","children_home":"children-home","children_parent_management":"children-parent-management","children_remote_authorize":"children-remote-authorize","children_business_proxy":"children-business-proxy","children_safety_settings":"children-safety-settings","children_parent_monitor":"children-parent-monitor","ai_platform_overview":"ai-platform-overview","ai_nlu_processing":"ai-nlu-processing","ai_automated_service":"ai-automated-service","ai_user_behavior_analysis":"ai-user-behavior-analysis","ai_platform_settings":"ai-platform-settings","high_frequency_service_selection":"high-frequency-service-selection","service_booking_appointment":"service-booking-appointment","service_travel_booking":"service-travel-booking","service_life_payment":"service-life-payment","service_payment_confirmation":"service-payment-confirmation","service_emergency_call":"service-emergency-call","elderly_emergency_initiate":"elderly-emergency-initiate","elderly_emergency_response_options":"elderly-emergency-response-options","elderly_emergency_help_request":"elderly-emergency-help-request","elderly_emergency_cancel":"elderly-emergency-cancel","children_account_bind":"children-account-bind","children_information_prefill":"children-information-prefill","initial_welcome":"initial-welcome","login_options":"login-options","phone_login":"phone-login","wechat_login":"wechat-login","registration_start":"registration-start","phone_verification":"phone-verification","user_type_selection":"user-type-selection","elderly_family_interaction_content_hub":"elderly-family-interaction-content-hub","elderly_family_video_call":"elderly-family-video-call","elderly_information_browsing":"elderly-information-browsing","elderly_content_detail":"elderly-content-detail","elderly_customer_service_selection":"elderly-customer-service-selection"}
+            const IFRAME_MESSAGE_TYPE = {
+              iframeNavigation: &#39;iframeNavigation&#39;,
+            }
+            const targetPageId = getKeyByValueObj(allFormatPageIdsMap, String(to || &#39;&#39;))
+            if (targetPageId) {
+              window.parent.postMessage({
+                type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                targetPageId,
+              }, &#39;*&#39;)
+            }
+          }
+        } catch(e) {}
+      }
+      try{
+        if (&#39;navigation&#39; in window &amp;&amp; window.navigation &amp;&amp; typeof window.navigation.addEventListener===&#39;function&#39;){
+          window.navigation.addEventListener(&#39;navigate&#39;, function(e){
+            try{
+              var url = (e.destination &amp;&amp; e.destination.url) || &#39;&#39;;
+              if (e.canIntercept &amp;&amp; typeof e.intercept===&#39;function&#39;){ e.intercept({ handler:function(){} }) }
+              else if (e.preventDefault){ e.preventDefault() }
+              emit(url)
+            }catch(_){}
+          })
+        }
+      }catch(_){}
+    })();</script><meta name="supported-color-schemes" content="light"><meta name="color-scheme" content="light"><style>
+      :root, html, body { color-scheme: light; }
+      html { forced-color-adjust: none; }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Built with Astro">
+    <title data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="16" data-source-line-end="16">安全管控设置 - 银龄桥</title>
+  <link rel="stylesheet" href="./assets/html/68141/ai-automated-service.CedRRZM6.css">
+<style></style><script src="https://assets.qingshuxuetang.com/static/uxbot/25_6/holder.js"></script></head>
+  <body data-source-file="src/layouts/BaseLayout.astro" data-source-line-start="18" data-source-line-end="20">
+    
+  <div data-source-file="src/pages/children-safety-settings.astro" data-source-line-start="10" data-source-line-end="26" class="min-h-screen bg-background flex flex-col">
+    <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&amp;&amp;s.isSameNode(this)&amp;&amp;(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&amp;&amp;s.isSameNode(this)&amp;&amp;(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&amp;&amp;(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&amp;&amp;this.lastChild.nodeValue==="astro:end"&amp;&amp;(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&amp;&amp;await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><astro-island uid="1PkhBl" prefix="s0" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/ChildrenHeader.DlXPrcsu.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/client.BnO2dzpZ.js" props="{&amp;quot;title&amp;quot;:[0,&amp;quot;安全管控设置&amp;quot;],&amp;quot;showBack&amp;quot;:[0,true],&amp;quot;backHref&amp;quot;:[0,&amp;quot;./children-parent-management.html&amp;quot;]}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;ChildrenHeader&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><header class="sticky top-0 left-0 right-0 bg-card border-b border-border safe-area-inset-top z-40" data-source-file="src/components/common/ChildrenHeader.vue" data-source-line-start="29" data-source-line-end="73"><div class="flex items-center justify-between px-4 py-3" data-source-file="src/components/common/ChildrenHeader.vue" data-source-line-start="30" data-source-line-end="72"><div class="w-10" data-source-file="src/components/common/ChildrenHeader.vue" data-source-line-start="32" data-source-line-end="44"><a class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 w-10 touch-target" href="./children-parent-management.html" aria-label="返回" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27"><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" class="lucide lucide-chevron-left-icon lucide-chevron-left"><path d="m15 18-6-6 6-6"></path></svg><!--]--></a></div><h1 class="flex-1 text-center text-lg font-medium text-foreground px-2" data-source-file="src/components/common/ChildrenHeader.vue" data-source-line-start="47" data-source-line-end="49">安全管控设置</h1><div class="w-10" data-source-file="src/components/common/ChildrenHeader.vue" data-source-line-start="52" data-source-line-end="71"><!----></div></div></header><!--astro:end--></astro-island>
+    
+    <main data-source-file="src/pages/children-safety-settings.astro" data-source-line-start="18" data-source-line-end="20" class="flex-1 pb-20">
+      <script>(()=>{var l=(n,t)=>{let i=async()=>{await(await n())()},e=typeof t.value=="object"?t.value:void 0,s={timeout:e==null?void 0:e.timeout};"requestIdleCallback"in window?window.requestIdleCallback(i,s):setTimeout(i,s.timeout||200)};(self.Astro||(self.Astro={})).idle=l;window.dispatchEvent(new Event("astro:idle"));})();</script><astro-island uid="rdpI7" prefix="s1" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/SafetySettingsContent.5EHn4M4K.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/client.BnO2dzpZ.js" props="{}" ssr="" client="idle" opts="{&amp;quot;name&amp;quot;:&amp;quot;SafetySettingsContent&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><div class="w-full max-w-2xl mx-auto px-4 py-6 space-y-6" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="74" data-source-line-end="243" data-v-ec1dcd03=""><section class="space-y-4" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="76" data-source-line-end="154" data-v-ec1dcd03=""><div class="flex items-center gap-2 mb-4" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="77" data-source-line-end="80" data-v-ec1dcd03=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-secondary lucide-wallet-minimal-icon lucide-wallet-minimal text-secondary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03=""><path d="M17 14h.01"></path><path d="M7 7h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14"></path></svg><h2 class="text-xl font-semibold text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="79" data-source-line-end="79" data-v-ec1dcd03="">支付限额设置</h2></div><div class="space-y-3" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="82" data-source-line-end="149" data-v-ec1dcd03=""><!--[--><div class="bg-card border border-border rounded-lg p-4 space-y-3" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="83" data-source-line-end="148" data-v-ec1dcd03=""><div class="flex items-center justify-between" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="88" data-source-line-end="102" data-v-ec1dcd03=""><div class="flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="89" data-source-line-end="96" data-v-ec1dcd03=""><h3 class="text-base font-medium text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="90" data-source-line-end="92" data-v-ec1dcd03="">单笔限额</h3><p class="text-sm text-muted-foreground mt-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="93" data-source-line-end="95" data-v-ec1dcd03="">单笔支付限额（紧急求助可豁免）</p></div><button class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input ml-4" checked="" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="23" data-source-line-end="35" data-v-ec1dcd03="" role="switch" type="button" value="on" aria-checked="false" aria-required="false" data-state="unchecked"><!--[--><span data-state="unchecked" class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="30" data-source-line-end="34"><!--[--><!--]--></span><!--]--><!--v-if--></button></div><div class="flex items-center gap-3 pt-2 border-t border-border" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="105" data-source-line-end="147" data-v-ec1dcd03=""><span class="text-sm text-muted-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="106" data-source-line-end="106" data-v-ec1dcd03="">限额金额：</span><div class="flex items-center gap-2 flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="134" data-source-line-end="146" data-v-ec1dcd03=""><span class="text-base font-semibold text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="135" data-source-line-end="137" data-v-ec1dcd03=""> ¥200</span><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground rounded-md px-3 h-8 ml-auto" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-ec1dcd03=""><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03="" class="lucide lucide-pen-icon lucide-pen"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg><!--]--></button></div></div></div><div class="bg-card border border-border rounded-lg p-4 space-y-3" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="83" data-source-line-end="148" data-v-ec1dcd03=""><div class="flex items-center justify-between" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="88" data-source-line-end="102" data-v-ec1dcd03=""><div class="flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="89" data-source-line-end="96" data-v-ec1dcd03=""><h3 class="text-base font-medium text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="90" data-source-line-end="92" data-v-ec1dcd03="">单日限额</h3><p class="text-sm text-muted-foreground mt-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="93" data-source-line-end="95" data-v-ec1dcd03="">单日累计支付限额</p></div><button class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input ml-4" checked="" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="23" data-source-line-end="35" data-v-ec1dcd03="" role="switch" type="button" value="on" aria-checked="false" aria-required="false" data-state="unchecked"><!--[--><span data-state="unchecked" class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="30" data-source-line-end="34"><!--[--><!--]--></span><!--]--><!--v-if--></button></div><div class="flex items-center gap-3 pt-2 border-t border-border" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="105" data-source-line-end="147" data-v-ec1dcd03=""><span class="text-sm text-muted-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="106" data-source-line-end="106" data-v-ec1dcd03="">限额金额：</span><div class="flex items-center gap-2 flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="134" data-source-line-end="146" data-v-ec1dcd03=""><span class="text-base font-semibold text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="135" data-source-line-end="137" data-v-ec1dcd03=""> ¥500</span><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground rounded-md px-3 h-8 ml-auto" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-ec1dcd03=""><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03="" class="lucide lucide-pen-icon lucide-pen"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg><!--]--></button></div></div></div><div class="bg-card border border-border rounded-lg p-4 space-y-3" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="83" data-source-line-end="148" data-v-ec1dcd03=""><div class="flex items-center justify-between" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="88" data-source-line-end="102" data-v-ec1dcd03=""><div class="flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="89" data-source-line-end="96" data-v-ec1dcd03=""><h3 class="text-base font-medium text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="90" data-source-line-end="92" data-v-ec1dcd03="">单月限额</h3><p class="text-sm text-muted-foreground mt-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="93" data-source-line-end="95" data-v-ec1dcd03="">单月累计支付限额</p></div><button class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input ml-4" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="23" data-source-line-end="35" data-v-ec1dcd03="" role="switch" type="button" value="on" aria-checked="false" aria-required="false" data-state="unchecked"><!--[--><span data-state="unchecked" class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="30" data-source-line-end="34"><!--[--><!--]--></span><!--]--><!--v-if--></button></div><div class="flex items-center gap-3 pt-2 border-t border-border" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="105" data-source-line-end="147" data-v-ec1dcd03=""><span class="text-sm text-muted-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="106" data-source-line-end="106" data-v-ec1dcd03="">限额金额：</span><div class="flex items-center gap-2 flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="134" data-source-line-end="146" data-v-ec1dcd03=""><span class="text-base font-semibold text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="135" data-source-line-end="137" data-v-ec1dcd03=""> ¥2000</span><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;amp;_svg]:pointer-events-none [&amp;amp;_svg]:size-4 [&amp;amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground rounded-md px-3 h-8 ml-auto" data-source-file="src/components/ui/button/Button.vue" data-source-line-start="21" data-source-line-end="27" data-v-ec1dcd03=""><!--[--><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03="" class="lucide lucide-pen-icon lucide-pen"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg><!--]--></button></div></div></div><!--]--></div><p class="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="151" data-source-line-end="153" data-v-ec1dcd03=""> 💡 提示：支付限额可有效降低风险。紧急求助情况下可临时豁免单笔限额。 </p></section><section class="space-y-4" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="157" data-source-line-end="211" data-v-ec1dcd03=""><div class="flex items-center gap-2 mb-4" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="158" data-source-line-end="161" data-v-ec1dcd03=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-secondary lucide-shield-icon lucide-shield text-secondary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03=""><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg><h2 class="text-xl font-semibold text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="160" data-source-line-end="160" data-v-ec1dcd03="">敏感操作提醒</h2></div><div class="space-y-3" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="163" data-source-line-end="206" data-v-ec1dcd03=""><!--[--><div class="bg-card border rounded-lg p-4 space-y-3 transition-colors border-border" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="164" data-source-line-end="205" data-v-ec1dcd03=""><div class="flex items-start justify-between gap-3" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="172" data-source-line-end="198" data-v-ec1dcd03=""><div class="flex items-start gap-3 flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="173" data-source-line-end="192" data-v-ec1dcd03=""><div class="p-2 rounded-lg mt-0.5 bg-secondary/10" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="174" data-source-line-end="183" data-v-ec1dcd03=""><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-secondary lucide-wallet-minimal-icon lucide-wallet-minimal text-secondary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03=""><path d="M17 14h.01"></path><path d="M7 7h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14"></path></svg></div><div class="flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="184" data-source-line-end="191" data-v-ec1dcd03=""><h3 class="text-base font-medium text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="185" data-source-line-end="187" data-v-ec1dcd03="">高金额缴费提醒</h3><p class="text-sm text-muted-foreground mt-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="188" data-source-line-end="190" data-v-ec1dcd03="">超过 ¥150 时触发提醒</p></div></div><button class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input ml-2" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="23" data-source-line-end="35" data-v-ec1dcd03="" role="switch" type="button" value="on" aria-checked="false" aria-required="false" data-state="unchecked"><!--[--><span data-state="unchecked" class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="30" data-source-line-end="34"><!--[--><!--]--></span><!--]--><!--v-if--></button></div><div class="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="201" data-source-line-end="204" data-v-ec1dcd03=""><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03="" class="lucide lucide-clock-icon lucide-clock"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle></svg><span data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="203" data-source-line-end="203" data-v-ec1dcd03="">最后触发：无记录</span></div></div><div class="bg-card border rounded-lg p-4 space-y-3 transition-colors border-destructive/30 bg-destructive/5" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="164" data-source-line-end="205" data-v-ec1dcd03=""><div class="flex items-start justify-between gap-3" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="172" data-source-line-end="198" data-v-ec1dcd03=""><div class="flex items-start gap-3 flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="173" data-source-line-end="192" data-v-ec1dcd03=""><div class="p-2 rounded-lg mt-0.5 bg-destructive/10" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="174" data-source-line-end="183" data-v-ec1dcd03=""><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-destructive lucide-map-pin-off-icon lucide-map-pin-off text-destructive" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03=""><path d="M12.75 7.09a3 3 0 0 1 2.16 2.16"></path><path d="M17.072 17.072c-1.634 2.17-3.527 3.912-4.471 4.727a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 1.432-4.568"></path><path d="m2 2 20 20"></path><path d="M8.475 2.818A8 8 0 0 1 20 10c0 1.183-.31 2.377-.81 3.533"></path><path d="M9.13 9.13a3 3 0 0 0 3.74 3.74"></path></svg></div><div class="flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="184" data-source-line-end="191" data-v-ec1dcd03=""><h3 class="text-base font-medium text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="185" data-source-line-end="187" data-v-ec1dcd03="">异常登录预警</h3><p class="text-sm text-muted-foreground mt-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="188" data-source-line-end="190" data-v-ec1dcd03="">2025-11-15 (异地登录尝试)</p></div></div><button class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input ml-2" checked="" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="23" data-source-line-end="35" data-v-ec1dcd03="" role="switch" type="button" value="on" aria-checked="false" aria-required="false" data-state="unchecked"><!--[--><span data-state="unchecked" class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="30" data-source-line-end="34"><!--[--><!--]--></span><!--]--><!--v-if--></button></div><div class="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="201" data-source-line-end="204" data-v-ec1dcd03=""><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03="" class="lucide lucide-clock-icon lucide-clock"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle></svg><span data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="203" data-source-line-end="203" data-v-ec1dcd03="">最后触发：2025-11-15 (异地登录尝试)</span></div></div><div class="bg-card border rounded-lg p-4 space-y-3 transition-colors border-destructive/30 bg-destructive/5" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="164" data-source-line-end="205" data-v-ec1dcd03=""><div class="flex items-start justify-between gap-3" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="172" data-source-line-end="198" data-v-ec1dcd03=""><div class="flex items-start gap-3 flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="173" data-source-line-end="192" data-v-ec1dcd03=""><div class="p-2 rounded-lg mt-0.5 bg-destructive/10" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="174" data-source-line-end="183" data-v-ec1dcd03=""><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-destructive lucide-lock-icon lucide-lock text-destructive" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03=""><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div><div class="flex-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="184" data-source-line-end="191" data-v-ec1dcd03=""><h3 class="text-base font-medium text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="185" data-source-line-end="187" data-v-ec1dcd03="">频繁错误拦截</h3><p class="text-sm text-muted-foreground mt-1" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="188" data-source-line-end="190" data-v-ec1dcd03="">无记录</p></div></div><button class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input ml-2" checked="" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="23" data-source-line-end="35" data-v-ec1dcd03="" role="switch" type="button" value="on" aria-checked="false" aria-required="false" data-state="unchecked"><!--[--><span data-state="unchecked" class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5" data-source-file="src/components/ui/switch/Switch.vue" data-source-line-start="30" data-source-line-end="34"><!--[--><!--]--></span><!--]--><!--v-if--></button></div><div class="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="201" data-source-line-end="204" data-v-ec1dcd03=""><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03="" class="lucide lucide-clock-icon lucide-clock"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle></svg><span data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="203" data-source-line-end="203" data-v-ec1dcd03="">最后触发：无记录</span></div></div><!--]--></div><p class="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="208" data-source-line-end="210" data-v-ec1dcd03=""> 💡 提示：启用敏感操作提醒后，当父母进行相关操作时，您将收到实时通知。 </p></section><section class="bg-secondary/5 border border-secondary/20 rounded-lg p-4 space-y-3" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="214" data-source-line-end="237" data-v-ec1dcd03=""><h3 class="text-base font-semibold text-foreground flex items-center gap-2" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="215" data-source-line-end="218" data-v-ec1dcd03=""><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-secondary lucide-info-icon lucide-info text-secondary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49" data-v-ec1dcd03=""><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg> 安全管控指南 </h3><ul class="space-y-2 text-sm text-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="219" data-source-line-end="236" data-v-ec1dcd03=""><li class="flex gap-2" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="220" data-source-line-end="223" data-v-ec1dcd03=""><span class="text-secondary font-bold" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="221" data-source-line-end="221" data-v-ec1dcd03="">•</span><span data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="222" data-source-line-end="222" data-v-ec1dcd03="">定期检查支付限额设置，根据父母消费习惯调整</span></li><li class="flex gap-2" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="224" data-source-line-end="227" data-v-ec1dcd03=""><span class="text-secondary font-bold" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="225" data-source-line-end="225" data-v-ec1dcd03="">•</span><span data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="226" data-source-line-end="226" data-v-ec1dcd03="">启用所有敏感操作提醒，及时发现异常行为</span></li><li class="flex gap-2" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="228" data-source-line-end="231" data-v-ec1dcd03=""><span class="text-secondary font-bold" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="229" data-source-line-end="229" data-v-ec1dcd03="">•</span><span data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="230" data-source-line-end="230" data-v-ec1dcd03="">如发现异常登录，请立即修改父母账户密码</span></li><li class="flex gap-2" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="232" data-source-line-end="235" data-v-ec1dcd03=""><span class="text-secondary font-bold" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="233" data-source-line-end="233" data-v-ec1dcd03="">•</span><span data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="234" data-source-line-end="234" data-v-ec1dcd03="">紧急情况下可临时调整限额或禁用某些功能</span></li></ul></section><div class="pb-4 text-center text-xs text-muted-foreground" data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="240" data-source-line-end="242" data-v-ec1dcd03=""><p data-source-file="src/components/children-safety-settings/SafetySettingsContent.vue" data-source-line-start="241" data-source-line-end="241" data-v-ec1dcd03="">所有设置已自动保存</p></div></div><!--astro:end--></astro-island>
+    </main>
+    
+    <astro-island uid="1sKB6B" prefix="s2" component-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/ChildrenBottomNav.1auRtQGC.js" component-export="default" renderer-url="https://uxbot-prod-public.s3.cn-north-1.amazonaws.com.cn/html/68141/client.BnO2dzpZ.js" props="{&amp;quot;currentPage&amp;quot;:[0,&amp;quot;management&amp;quot;]}" ssr="" client="load" opts="{&amp;quot;name&amp;quot;:&amp;quot;ChildrenBottomNav&amp;quot;,&amp;quot;value&amp;quot;:true}" await-children=""><nav class="fixed bottom-0 left-0 right-0 bg-card border-t border-border safe-area-inset-bottom z-50" data-source-file="src/components/common/ChildrenBottomNav.vue" data-source-line-start="24" data-source-line-end="48"><div class="flex items-center justify-around px-2 py-2" data-source-file="src/components/common/ChildrenBottomNav.vue" data-source-line-start="25" data-source-line-end="47"><!--[--><a href="./children-home.html" class="flex flex-col items-center justify-center gap-1 px-6 py-2 rounded-lg transition-colors touch-target text-muted-foreground hover:text-foreground" aria-label="首页" data-source-file="src/components/common/ChildrenBottomNav.vue" data-source-line-start="26" data-source-line-end="46"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg><span class="text-xs font-medium" data-source-file="src/components/common/ChildrenBottomNav.vue" data-source-line-start="45" data-source-line-end="45">首页</span></a><a href="./children-parent-management.html" class="flex flex-col items-center justify-center gap-1 px-6 py-2 rounded-lg transition-colors touch-target text-secondary bg-secondary/10" aria-label="父母管理" aria-current="page" data-source-file="src/components/common/ChildrenBottomNav.vue" data-source-line-start="26" data-source-line-end="46"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-secondary lucide-users-icon lucide-users text-secondary" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg><span class="text-xs font-medium" data-source-file="src/components/common/ChildrenBottomNav.vue" data-source-line-start="45" data-source-line-end="45">父母管理</span></a><a href="./children-parent-monitor.html" class="flex flex-col items-center justify-center gap-1 px-6 py-2 rounded-lg transition-colors touch-target text-muted-foreground hover:text-foreground" aria-label="状态监测" data-source-file="src/components/common/ChildrenBottomNav.vue" data-source-line-start="26" data-source-line-end="46"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity-icon lucide-activity" data-source-file="src/components/common/SafeIcon.vue" data-source-line-start="43" data-source-line-end="49"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path></svg><span class="text-xs font-medium" data-source-file="src/components/common/ChildrenBottomNav.vue" data-source-line-start="45" data-source-line-end="45">状态监测</span></a><!--]--></div></nav><!--astro:end--></astro-island>
+  </div>
+
+  <script>
+      const originalBack = window.history.back
+      const originalForward = window.history.forward
+      const originalGo = window.history.go
+      function isValidNavigation(){
+        if(!window.parent.history.state.back || !window.parent.history.state.back.startsWith(&#39;/designPage&#39;)){
+          return false
+        }
+        return true
+      }
+      window.history.back = function(...args) {
+       if(!isValidNavigation()){
+          return
+        }
+        return originalBack.apply(this, args);
+      };
+
+      window.history.forward = function(...args) {
+        if(!isValidNavigation()){
+          return
+        }
+        return originalForward.apply(this, args);
+      };
+
+      window.history.go = function(...args) {
+        if(!isValidNavigation()){
+          return
+        }
+        return originalGo.apply(this, args);
+      };
+      // 等待 Holder.js 加载完成后初始化
+      setTimeout(() => {
+        if (typeof Holder === &#39;undefined&#39;) {
+          console.warn(&#39;Holder.js 未能正确加载&#39;);
+          return;
+        }
+        
+        try {
+          // 初始化 Holder.js
+          Holder.run({
+            domain: "placehold.co"
+          });
+          
+          // 保存原始函数的引用
+          const originalRun = Holder.run;
+          
+          // 重写 Holder.run 函数以移除固定尺寸
+          Holder.run = function(options) {
+            const result = originalRun.call(this, options);
+            
+            // 移除 Holder 元素的固定宽高样式
+            const holderElements = document.querySelectorAll(&#39;[data-holder-rendered="true"]&#39;);
+            holderElements.forEach(el => {
+              el.style.removeProperty(&#39;width&#39;);
+              el.style.removeProperty(&#39;height&#39;);
+            });
+            
+            return result;
+          };
+        } catch (error) {
+          console.error(&#39;Holder.js 初始化失败:&#39;, error);
+        }
+      }, 30);
+    </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            
